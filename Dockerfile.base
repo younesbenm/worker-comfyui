@@ -189,3 +189,11 @@ FROM base AS final
 
 # Copy models from stage 2 to the final image
 COPY --from=downloader /comfyui/models /comfyui/models
+# Frame interpolation (RIFE 4.9, MIT) for the "smooth" option of AwesomeToolkit's
+# image-to-video: 24 → 48 fps. Weights baked in (21 MB) so workers never download.
+RUN git clone https://github.com/Fannovel16/ComfyUI-Frame-Interpolation /comfyui/custom_nodes/ComfyUI-Frame-Interpolation \
+    && cd /comfyui/custom_nodes/ComfyUI-Frame-Interpolation && git checkout 26545cc2dd95bc3d27f056016300673bdeee78f5 \
+    && uv pip install einops opencv-contrib-python kornia scipy tqdm \
+    && mkdir -p ckpts/rife \
+    && wget -q -O ckpts/rife/rife49.pth https://huggingface.co/marduk191/rife/resolve/main/rife49.pth \
+    && test -s ckpts/rife/rife49.pth
