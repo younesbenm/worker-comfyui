@@ -14,3 +14,4 @@ runpod_worker_comfy:
   text_encoders: models/text_encoders/
   latent_upscale_models: models/latent_upscale_models/
   frame_interpolation: models/frame_interpolation/
+  TTS: models/TTS/

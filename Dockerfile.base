@@ -189,3 +189,12 @@ FROM base AS final
 
 # Copy models from stage 2 to the final image
 COPY --from=downloader /comfyui/models /comfyui/models
+
+# AwesomeToolkit: Qwen3-TTS (Apache-2.0 weights) for the story maker's character voices.
+# Node pack ComfyUI-QwenTTS (GPL-3.0, used unmodified), pinned. Weights live on the
+# network volume under models/TTS/Qwen3-TTS/<model> (key "TTS" in extra_model_paths.yaml).
+# Same transformers/huggingface-hub pin as the base layer, then the startup smoke test again.
+RUN git clone https://github.com/1038lab/ComfyUI-QwenTTS /comfyui/custom_nodes/ComfyUI-QwenTTS \
+    && cd /comfyui/custom_nodes/ComfyUI-QwenTTS && git checkout d8122a8ba835b65fd65c113d2b273b1ad1579293 \
+    && uv pip install -r requirements.txt "transformers>=4.57.3,<5" "huggingface-hub<1.0" \
+    && cd /comfyui && timeout 300 python main.py --quick-test-for-ci --cpu

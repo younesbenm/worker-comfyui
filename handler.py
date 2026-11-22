@@ -996,11 +996,13 @@ def handler(job):
 
         print(f"worker-comfyui - Processing {len(outputs)} output nodes...")
         for node_id, node_output in outputs.items():
-            if "images" in node_output:
+            # AwesomeToolkit: audio files (SaveAudio*, TTS, music) come back like images/videos
+            file_outputs = list(node_output.get("images") or []) + list(node_output.get("audio") or [])
+            if file_outputs:
                 print(
-                    f"worker-comfyui - Node {node_id} contains {len(node_output['images'])} image(s)"
+                    f"worker-comfyui - Node {node_id} contains {len(file_outputs)} file(s)"
                 )
-                for image_info in node_output["images"]:
+                for image_info in file_outputs:
                     filename = image_info.get("filename")
                     subfolder = image_info.get("subfolder", "")
                     img_type = image_info.get("type")
@@ -1085,7 +1087,7 @@ def handler(job):
                         errors.append(error_msg)
 
             # Check for other output types
-            other_keys = [k for k in node_output.keys() if k != "images"]
+            other_keys = [k for k in node_output.keys() if k not in ("images", "audio")]
             if other_keys:
                 warn_msg = (
                     f"Node {node_id} produced unhandled output keys: {other_keys}."
